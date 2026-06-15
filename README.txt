@@ -4,6 +4,6 @@ compile using:
   gcc main.c -o set-archive-bit -O2
 
 usage:
-  ./a.out file1 [file2...]
+  ./set-archive-bit file1 [file2...]
 
 This will attempt to set the archive bit on all passed file / directory paths.
