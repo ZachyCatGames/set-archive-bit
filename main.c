@@ -8,15 +8,32 @@
 #include <unistd.h>
 #include <errno.h>
 
+void usage(const char* name) {
+	printf(
+		"set-archive-bit by zachycatgames\n"
+		"%s [option] file1 [file2...]\n"
+		"option:\n"
+		"\t-d: clear the archive bit\n"
+		"\t-a: set the archive (default)\n",
+		name
+	);
+	exit(EXIT_SUCCESS);
+}
+
 int main(int argc, char** argv) {
-	printf("%d\n", argc);
 	if (argc < 2 || strcmp(argv[1], "--help") == 0 || strcmp(argv[1], "-h") == 0) {
-		printf(
-			"set-archive-bit by zachycatgames\n"
-			"%s file1 [file2...]\n",
-			argv[0]
-		);
-		return EXIT_SUCCESS;
+		usage(argv[0]);
+	}
+
+	bool delete = false;
+	if (strcmp(argv[1], "-d") == 0 || strcmp(argv[1], "-a") == 0) {
+		if (argc < 3) {
+			usage(argv[0]);
+		}
+		if (strcmp(argv[1], "-d")) {
+			delete = true;
+		}
+		// else "-a" is set and nothing needs to be done
 	}
 
 	bool failed = false;
@@ -37,7 +54,12 @@ int main(int argc, char** argv) {
 			goto cleanup;
 		}
 
-		attrib |= ATTR_ARCH;
+		if (delete) {
+			attrib &= ~ATTR_ARCH;
+		} else {
+			attrib |= ATTR_ARCH;
+		}
+
 		res = ioctl(fd, FAT_IOCTL_SET_ATTRIBUTES, &attrib);
 		if (res < 0) {
 			printf("Failed to write FAT attributes for %s: %s\n", cur_path, strerror(errno));
